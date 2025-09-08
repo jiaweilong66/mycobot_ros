@@ -165,6 +165,7 @@ catkin_install_python(PROGRAMS
   scripts/follow_display.py
   scripts/simple_gui.py
   scripts/teleop_keyboard.py
+  scripts/slider_control_force_gripper.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
