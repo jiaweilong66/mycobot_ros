@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 3.0.2)
-project(mycobot_pro_450)
+cmake_minimum_required(VERSION 2.8.3)
+project(mycobot_pro450_communication)
+add_compile_options(-std=c++11)
 
 ## Compile as C++11, supported in ROS Kinetic and newer
 # add_compile_options(-std=c++11)
@@ -8,10 +9,10 @@ project(mycobot_pro_450)
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
-  rospy
-  std_msgs
-  mycobot_communication
-  mycobot_description
+    rospy
+    std_msgs
+    genmsg 
+    message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -48,18 +49,27 @@ find_package(catkin REQUIRED COMPONENTS
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(FILES
+  MycobotAngles.msg
+  MycobotCoords.msg
+  MycobotSetAngles.msg
+  MycobotSetCoords.msg
+  MycobotGripperStatus.msg
+  MycobotSetFreshMode.msg
+
+)
 
 ## Generate services in the 'srv' folder
-# add_service_files(
-#   FILES
-#   Service1.srv
-#   Service2.srv
-# )
+add_service_files(FILES 
+  GetAngles.srv
+  SetAngles.srv
+  GetCoords.srv
+  SetCoords.srv
+  GripperStatus.srv
+  SetFreshMode.srv
+)
+## Generate added messages and services
+generate_messages(DEPENDENCIES std_msgs)
 
 ## Generate actions in the 'action' folder
 # add_action_files(
@@ -71,7 +81,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs
+#   std_msgs  # Or other packages containing msgs
 # )
 
 ################################################
@@ -103,11 +113,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## LIBRARIES: libraries you create in this project that dependent projects also need
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
+## Declare a catkin package
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES mycobot_pro_450
-#  CATKIN_DEPENDS rospy std_msgs
-#  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime std_msgs
 )
 
 ###########
@@ -118,12 +126,12 @@ catkin_package(
 ## Your package locations should be listed before other locations
 include_directories(
 # include
-  ${catkin_INCLUDE_DIRS}
+# ${catkin_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/mycobot_pro_450.cpp
+#   src/${PROJECT_NAME}/mycobot_commuication.cpp
 # )
 
 ## Add cmake target dependencies of the library
@@ -134,7 +142,7 @@ include_directories(
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/mycobot_pro_450_node.cpp)
+# add_executable(${PROJECT_NAME}_node src/mycobot_commuication_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -161,10 +169,8 @@ include_directories(
 ## Mark executable scripts (Python etc.) for installation
 ## in contrast to setup.py, you can choose the destination
 catkin_install_python(PROGRAMS
-  scripts/slider_control.py
-  scripts/follow_display.py
-  scripts/simple_gui.py
-  scripts/teleop_keyboard.py
+  scripts/mycobot_services.py
+  scripts/mycobot_topics.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
@@ -201,7 +207,7 @@ catkin_install_python(PROGRAMS
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_mycobot_pro_450.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_mycobot_commuication.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

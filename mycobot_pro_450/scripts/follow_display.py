@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding:utf-8 -*-
 """
-display_joint_states.py
+follow_display.py
 This ROS node connects to a Pro450 robotic arm and publishes its joint states
 and a visualization marker to ROS topics.
 
