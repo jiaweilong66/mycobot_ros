@@ -21,6 +21,7 @@ try:
 except ImportError:
     import Tkinter as tk
     from Tkinter import messagebox
+import threading
 import rospy
 import time
 from rospy import ServiceException
@@ -238,12 +239,11 @@ class Window:
         self.speed = int(float(self.get_speed.get())) if self.get_speed.get() else self.speed
         if not self.validate_speed(self.speed):
             return
-        c_value.append(self.speed)
-        try:
-            self.set_coords(*c_value)
-        except ServiceException:
-            pass
-        self.show_j_date(c_value[:-1], way="coord")
+        # c_value.append(self.speed)
+        self.async_call(self.set_coords, *c_value, self.speed)
+        time.sleep(3)
+        self.get_date()
+        self.update_display()
 
     def get_joint_input(self):
         """Get joint angles from input boxes and send them to the robot."""
@@ -253,41 +253,48 @@ class Window:
         self.speed = int(float(self.get_speed.get())) if self.get_speed.get() else self.speed
         if not self.validate_speed(self.speed):
             return
-        j_value.append(self.speed)
-        try:
-            self.set_angles(*j_value)
-        except ServiceException:
-            pass
-        self.show_j_date(j_value[:-1])
+        # j_value.append(self.speed)
+        # Asynchronous Send
+        self.async_call(self.set_angles, *j_value, self.speed)
+        time.sleep(3)
+        self.get_date()
+        self.update_display()
 
+    def async_call(self, func, *args, **kwargs):
+        """Run service calls in a separate thread (non-blocking)."""
+        threading.Thread(target=func, args=args, kwargs=kwargs, daemon=True).start()
+        
+    def update_display(self):
+        """Update both joint angles and coordinates display."""
+        for val, var in zip(self.res_angles, self.cont_vars):
+            var.set(f"{val}°")
+        for val, var in zip(self.record_coords[:6], self.coord_vars):
+            var.set(str(val))
+            
     def get_date(self):
-        """Fetch the current robot coordinates and joint angles for display."""
-        # Get coordinates
-        t_start = time.time()
-        while time.time() - t_start < 2:
-            self.res = self.get_coords()
-            if self.res.x > 1:
-                break
-            time.sleep(0.1)
-
-        # Get joint angles
-        t_start = time.time()
-        while time.time() - t_start < 2:
-            self.angles = self.get_angles()
-            if self.angles.joint_1 > 1:
-                break
-            time.sleep(0.1)
-
-        # Update internal state
-        self.record_coords = [
-            round(self.res.x, 2), round(self.res.y, 2), round(self.res.z, 2),
-            round(self.res.rx, 2), round(self.res.ry, 2), round(self.res.rz, 2),
-            self.speed
-        ]
-        self.res_angles = [
-            round(self.angles.joint_1, 2), round(self.angles.joint_2, 2), round(self.angles.joint_3, 2),
-            round(self.angles.joint_4, 2), round(self.angles.joint_5, 2), round(self.angles.joint_6, 2)
-        ]
+        """Fetch current robot state (non-blocking)."""
+        try:
+            # get coordinates
+            res = self.get_coords()
+            if res:
+                self.record_coords = [
+                    round(res.x, 2), round(res.y, 2), round(res.z, 2),
+                    round(res.rx, 2), round(res.ry, 2), round(res.rz, 2),
+                    self.speed
+                ]
+            else:
+                self.record_coords = [-1] * 6
+            # get joint angles
+            angles = self.get_angles()
+            if angles:
+                self.res_angles = [
+                    round(angles.joint_1, 2), round(angles.joint_2, 2), round(angles.joint_3, 2),
+                    round(angles.joint_4, 2), round(angles.joint_5, 2), round(angles.joint_6, 2)
+                ]
+            else:
+                self.res_angles = [-1] * 6
+        except ServiceException:
+            print("ROS service unavailable, skip update.")
 
     def show_j_date(self, data, way: str = ""):
         """Update the display labels with new joint or coordinate data.
