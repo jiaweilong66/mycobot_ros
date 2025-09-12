@@ -70,7 +70,7 @@ def talker():
         exit(1)
 
     # Enable all motors
-    mycobot_450.set_motor_enabled(0, 254)
+    mycobot_450.set_motor_enabled(254, 0)
     time.sleep(0.1)
     print("All servos released.\n")
 
