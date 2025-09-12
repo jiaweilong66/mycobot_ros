@@ -111,7 +111,7 @@ def talker():
 
             # Get robot coordinates
             coords = mycobot_450.get_coords()
-            if not (isinstance(coords, list) and len(coords) != 0):
+            if not isinstance(coords, list) or len(coords) == 0 or coords == -1:
                 rospy.logwarn("Failed to get valid coordinates: {}".format(coords))
                 coords = [0, 0, 0, 0, 0, 0]  # fallback
 
