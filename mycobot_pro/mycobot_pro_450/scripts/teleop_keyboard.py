@@ -106,6 +106,8 @@ class MycobotTeleopTopic:
         self.curr_angles = [0] * 6
         self.record_coords = None
         self.home_pose = [0, -10, -123, 45, 0, 0]
+        # Flag: whether coordinate control is allowed
+        self.ready_for_coords = False
 
         # Subscribers
         rospy.Subscriber("mycobot/coords_real", MycobotCoords, self.coords_callback)
@@ -186,51 +188,60 @@ class MycobotTeleopTopic:
                         self.change_percent, self.change_len, self.change_angle
                     )
                     continue
+                # Preset poses
+                elif key == '1':
+                    self.send_angles([0, 0, 0, 0, 0, 0])
+                    time.sleep(2)
+                    self.record_coords = list(self.curr_coords)
+                    self.ready_for_coords = False
+                    rospy.logwarn("Returned to zero. Press '2' to enable coordinate control.")
+                elif key == '2':
+                    self.send_angles(self.home_pose)
+                    time.sleep(3)
+                    self.record_coords = list(self.curr_coords)
+                    self.ready_for_coords = True
+                    rospy.loginfo("Home pose reached. Coordinate control enabled.")
+                elif key == '3':
+                    self.home_pose = list(self.curr_angles)
+                    rospy.loginfo("Updated home pose.")
+                    
+                elif key in 'wWsSaAdDzZxXuUiIjJkKoOlL':
+                    if not self.ready_for_coords:
+                        rospy.logwarn("Coordinate control disabled. Please press '2' first.")
+                        continue
+                    # Cartesian movement
+                    if key in 'wW': self.record_coords[0] += self.change_len
+                    elif key in 'sS': self.record_coords[0] -= self.change_len
+                    elif key in 'aA': self.record_coords[1] += self.change_len
+                    elif key in 'dD': self.record_coords[1] -= self.change_len
+                    elif key in 'zZ': self.record_coords[2] -= self.change_len
+                    elif key in 'xX': self.record_coords[2] += self.change_len
 
-                # Cartesian movement
-                elif key in 'wW': self.record_coords[0] += self.change_len
-                elif key in 'sS': self.record_coords[0] -= self.change_len
-                elif key in 'aA': self.record_coords[1] += self.change_len
-                elif key in 'dD': self.record_coords[1] -= self.change_len
-                elif key in 'zZ': self.record_coords[2] -= self.change_len
-                elif key in 'xX': self.record_coords[2] += self.change_len
-
-                # Euler rotation
-                elif key in 'uU': self.record_coords[3] += self.change_angle
-                elif key in 'jJ': self.record_coords[3] -= self.change_angle
-                elif key in 'iI': self.record_coords[4] += self.change_angle
-                elif key in 'kK': self.record_coords[4] -= self.change_angle
-                elif key in 'oO': self.record_coords[5] += self.change_angle
-                elif key in 'lL': self.record_coords[5] -= self.change_angle
+                    # Euler rotation
+                    elif key in 'uU': self.record_coords[3] += self.change_angle
+                    elif key in 'jJ': self.record_coords[3] -= self.change_angle
+                    elif key in 'iI': self.record_coords[4] += self.change_angle
+                    elif key in 'kK': self.record_coords[4] -= self.change_angle
+                    elif key in 'oO': self.record_coords[5] += self.change_angle
+                    elif key in 'lL': self.record_coords[5] -= self.change_angle
 
                 # Gripper control
                 elif key in 'gG':
                     self.gripper_pub.publish(MycobotGripperStatus(Status=True))
                 elif key in 'hH':
                     self.gripper_pub.publish(MycobotGripperStatus(Status=False))
-
-                # Preset poses
-                elif key == '1':
-                    self.send_angles([0, 0, 0, 0, 0, 0])
-                    time.sleep(2)
-                    self.record_coords = list(self.curr_coords)
-                elif key == '2':
-                    self.send_angles(self.home_pose)
-                    time.sleep(2)
-                    self.record_coords = list(self.curr_coords)
-                elif key == '3':
-                    self.home_pose = list(self.curr_angles)
                 else:
                     continue
+                
+                if self.ready_for_coords:
+                    # Coordinate limits check
+                    for val, axis in zip(self.record_coords, ['x', 'y', 'z', 'rx', 'ry', 'rz']):
+                        min_v, max_v = COORD_LIMITS[axis]
+                        if not (min_v <= val <= max_v):
+                            rospy.logwarn(f"{axis} Out of range: {val} not in [{min_v}, {max_v}]")
+                            raise ValueError("Out of range of motion")
 
-                # Coordinate limits check
-                for val, axis in zip(self.record_coords, ['x', 'y', 'z', 'rx', 'ry', 'rz']):
-                    min_v, max_v = COORD_LIMITS[axis]
-                    if not (min_v <= val <= max_v):
-                        rospy.logwarn(f"{axis} Out of range: {val} not in [{min_v}, {max_v}]")
-                        raise ValueError("Out of range of motion")
-
-                self.send_coords()
+                    self.send_coords()
 
             except Exception as e:
                 rospy.logwarn("Execution failed: {}".format(e))

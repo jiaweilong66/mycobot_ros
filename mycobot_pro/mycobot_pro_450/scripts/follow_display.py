@@ -70,9 +70,10 @@ def talker():
         exit(1)
 
     # Enable all motors
-    mycobot_450.set_motor_enabled(254, 0)
+    # mycobot_450.set_motor_enabled(254, 0)
     time.sleep(0.1)
-    print("All servos released.\n")
+    # print("All servos released.\n")
+    print('Please press the button at the end of the machine to drag the joint.\n请按下机器末端按钮进行关节拖拽运动\n')
 
     # ROS publishers
     pub = rospy.Publisher("joint_states", JointState, queue_size=10)
