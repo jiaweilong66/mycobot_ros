@@ -21,6 +21,7 @@ try:
 except ImportError:
     import Tkinter as tk
     from Tkinter import messagebox
+import queue
 import threading
 import rospy
 import time
@@ -109,6 +110,41 @@ class Window:
         # tk.Button(self.frmLB, text="Pump On", command=self.pump_open, width=5).grid(row=2, column=0, sticky="w", padx=3, pady=20)
         # tk.Button(self.frmLB, text="Pump Off", command=self.pump_close, width=5).grid(row=2, column=1, sticky="w", padx=3, pady=2)
         
+        # Queues for thread-safe data transfer
+        self.data_queue = queue.Queue()
+        
+        # Start a background thread to capture ROS data
+        threading.Thread(target=self._refresh_data_thread, daemon=True).start()
+
+        # The main thread refreshes the GUI periodically
+        self.win.after(200, self._refresh_gui)
+
+    def _refresh_data_thread(self):
+        """Background thread pulls ROS data"""
+        while True:
+            try:
+                self.get_date()  # update self.record_coords and self.res_angles
+                # Put it in the queue and pass it to the main thread
+                self.data_queue.put((self.record_coords.copy(), self.res_angles.copy()))
+            except ServiceException:
+                print("ROS service unavailable, skip update.")
+            time.sleep(0.1)  # 10Hz
+
+    def _refresh_gui(self):
+        """The main thread takes data from the queue and refreshes the interface"""
+        try:
+            while not self.data_queue.empty():
+                coords, angles = self.data_queue.get_nowait()
+                self.record_coords = coords
+                self.res_angles = angles
+        except queue.Empty:
+            pass
+
+        # Update display
+        self.update_display()
+
+        # Call again after 50ms
+        self.win.after(50, self._refresh_gui)
 
     def connect_ser(self):
         """Connect to ROS services required for MyCobot control."""
@@ -230,7 +266,7 @@ class Window:
             )
             return False
         return True
-
+        
     def get_coord_input(self):
         """Get coordinates from input boxes and send them to the robot."""
         c_value = [float(i.get()) for i in self.c_vars]
@@ -241,9 +277,6 @@ class Window:
             return
         # c_value.append(self.speed)
         self.async_call(self.set_coords, *c_value, self.speed)
-        time.sleep(3)
-        self.get_date()
-        self.update_display()
 
     def get_joint_input(self):
         """Get joint angles from input boxes and send them to the robot."""
@@ -256,9 +289,6 @@ class Window:
         # j_value.append(self.speed)
         # Asynchronous Send
         self.async_call(self.set_angles, *j_value, self.speed)
-        time.sleep(3)
-        self.get_date()
-        self.update_display()
 
     def async_call(self, func, *args, **kwargs):
         """Run service calls in a separate thread (non-blocking)."""
@@ -309,15 +339,7 @@ class Window:
 
     def run(self):
         """Main GUI loop."""
-        while True:
-            try:
-                self.win.update()
-                time.sleep(0.001)
-            except tk.TclError as e:
-                if "application has been destroyed" in str(e):
-                    break
-                else:
-                    raise
+        self.win.mainloop()
 
 
 def main():

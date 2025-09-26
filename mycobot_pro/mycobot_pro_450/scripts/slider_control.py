@@ -79,6 +79,7 @@ def listener():
     time.sleep(0.05)
     mc.set_fresh_mode(1)
     time.sleep(0.05)
+    mc.set_limit_switch(2, 0)
 
     rospy.Subscriber("joint_states", JointState, callback)
 
