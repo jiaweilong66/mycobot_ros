@@ -19,5 +19,5 @@
 		<arg name="port" value="$(arg port)" />	
     </include>
 	<node name="real_listener_gripper" pkg="mycobot_pro_450" type="listen_real_gripper.py" />
-	<node name="simple_gui" pkg="mycobot_pro_450" type="simple_gui.py" />
+	<node name="simple_gui_gripper" pkg="mycobot_pro_450" type="simple_gui_force_gripper.py" />
 </launch>

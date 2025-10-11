@@ -38,9 +38,12 @@ def talker():
         gripper_res = gripper_service()
         if res.joint_1 == res.joint_2 == res.joint_3 == 0.0:
             continue
-        print('gripper_res.gripper_angle:', gripper_res.gripper_angle)
+        # print('gripper_res.gripper_angle:', gripper_res.gripper_angle)
         if gripper_res.gripper_angle != -1:
             gripper_value = gripper_res.gripper_angle
+        else:
+            gripper_value = 1
+            
         radians_list = [
             res.joint_1 * (math.pi / 180),
             res.joint_2 * (math.pi / 180),

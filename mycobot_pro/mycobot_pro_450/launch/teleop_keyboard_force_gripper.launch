@@ -19,5 +19,5 @@
 		<arg name="port" value="$(arg port)" />	
     </include>
 	<!-- listen and pub the real angles-->
-	<node name="real_listener" pkg="mycobot_pro_450" type="listen_real_of_topic_gripper.py" />
+	<node name="real_listener_topic_gripper" pkg="mycobot_pro_450" type="listen_real_of_topic_gripper.py" />
 </launch>
