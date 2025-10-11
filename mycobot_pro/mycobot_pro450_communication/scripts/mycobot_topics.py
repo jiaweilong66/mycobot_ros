@@ -42,7 +42,7 @@ import pymycobot
 from packaging import version
 
 # Minimum required pymycobot version
-MIN_REQUIRE_VERSION = '4.0.0'
+MIN_REQUIRE_VERSION = '4.0.1'
 
 current_verison = pymycobot.__version__
 print('Current pymycobot library version: {}'.format(current_verison))
@@ -116,8 +116,12 @@ class MycobotTopics:
         self.mc = Pro450Client(ip, port)
         self.lock = threading.Lock()
         self.output_robot_message()
+        if self.mc.is_power_on !=1:
+            self.mc.power_on()
+        time.sleep(0.05)
         if self.mc.get_fresh_mode()!=0:
             self.mc.set_fresh_mode(0)
+        time.sleep(0.05)
         self.mc.set_limit_switch(2, 0)
 
     def start(self):

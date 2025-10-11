@@ -25,7 +25,7 @@ import pymycobot
 from packaging import version
 
 # Minimum required pymycobot version
-MIN_REQUIRE_VERSION = '4.0.0'
+MIN_REQUIRE_VERSION = '4.0.1'
 
 current_verison = pymycobot.__version__
 print('Current pymycobot library version: {}'.format(current_verison))
@@ -96,9 +96,14 @@ def create_handle():
     rospy.loginfo("%s,%s" % (ip, port))
     mc = Pro450Client(ip, port)
     time.sleep(0.05)  # wait for serial port initialization
+    if mc.is_power_on !=1:
+        mc.power_on()
+    time.sleep(0.05)
     if mc.get_fresh_mode() !=0:
         mc.set_fresh_mode(0)
+    time.sleep(0.05)
     mc.set_limit_switch(2, 0)
+    time.sleep(0.05)
 
 
 def create_services():
