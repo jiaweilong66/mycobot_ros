@@ -12,16 +12,23 @@
   <!-- Launch Gazebo and spawn the robot -->
   <include file="$(dirname)/gazebo.launch" pass_all_args="true"/>
 
+  <!-- Ensure the robot_description is not loaded again in demo.launch -->
+  <arg name="load_robot_description" value="false" />
+
   <!-- Load gazebo_ros_control plugin -->
   <node name="joint_state_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-        output="screen" ns="/"
-        args="joint_state_controller" />s
+        output="screen" ns="/" args="--wait joint_state_controller" />
+  
+  <!-- Load arm and gripper controllers -->
   <node name="arm_gripper_controller_spawner" pkg="controller_manager" type="spawner" respawn="false"
-        output="screen" ns="/"
-        args="arm_controller gripper_controller" />
+        output="screen" ns="/" args="arm_controller gripper_controller" />
+
+  <!-- Add the start_state_max_bounds_error parameter -->
+  <param name="move_group/start_state_max_bounds_error" value="10.0" />
+
   <!-- Launch MoveIt -->
   <include file="$(dirname)/demo.launch" pass_all_args="true">
-    <!-- robot_description is loaded by gazebo.launch, to enable Gazebo features -->
+    <!-- Do not load robot_description again -->
     <arg name="load_robot_description" value="false" />
     <arg name="moveit_controller_manager" value="ros_control" />
   </include>
