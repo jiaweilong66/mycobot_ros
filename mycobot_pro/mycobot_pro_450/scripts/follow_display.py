@@ -73,6 +73,8 @@ def talker():
     if mycobot_450.is_power_on !=1:
         mycobot_450.power_on()
     time.sleep(0.05)
+    mycobot_450.set_free_move_mode(1)
+    time.sleep(0.05)
     # print("All servos released.\n")
     print('Please press the button at the end of the machine to drag the joint.\n请按下机器末端按钮进行关节拖拽运动\n')
 
