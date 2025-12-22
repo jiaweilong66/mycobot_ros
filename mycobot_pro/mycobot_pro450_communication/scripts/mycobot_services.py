@@ -252,12 +252,12 @@ robot_msg = """
 MyCobot Status
 --------------------------------
 Joint Limit:
-    joint 1: -165 ~ +165
-    joint 2: -120 ~ +120
-    joint 3: -158 ~ +158
-    joint 4: -165 ~ +165
-    joint 5: -165 ~ +165
-    joint 6: -175 ~ +175
+    joint 1: -162 ~ +162
+    joint 2: -125 ~ +125
+    joint 3: -154 ~ +154
+    joint 4: -162 ~ +162
+    joint 5: -162 ~ +162
+    joint 6: -165 ~ +165
 """
 
 
