@@ -19,17 +19,32 @@ class Listener(object):
         # init subscriber
         self.sub = rospy.Subscriber("mycobot/angles_real", MycobotAngles, self.callback)
         self.sub_gripper = rospy.Subscriber("mycobot/gripper_angle_real", MycobotGetGripperValue, self.gripper_callback)
-        self.gripper_angle = None
+        self.gripper_angle = 0.0
         rospy.spin()
         
 
+    # def gripper_callback(self, data):
+    #     """Force Gripper angle update"""
+    #     if data.gripper_angle >= 0:
+    #         self.gripper_angle = data.gripper_angle
+    #     else:
+    #         self.gripper_angle = 1
+    #         rospy.logwarn("Unable to read the gripper angle normally: {}".format(self.gripper_angle))
+    
     def gripper_callback(self, data):
-        """Force Gripper angle update"""
-        if data.gripper_angle >= 0:
-            self.gripper_angle = data.gripper_angle
-        else:
-            self.gripper_angle = 1
-            rospy.logwarn("Unable to read the gripper angle normally: {}".format(self.gripper_angle))
+        if data is None or not hasattr(data, "gripper_angle"):
+            rospy.logwarn_throttle(2.0, "Invalid gripper message")
+            return
+
+        angle = data.gripper_angle
+
+        if angle < 0:
+            rospy.logwarn_throttle(
+                2.0, f"Unable to read gripper angle, keep last: {self.gripper_angle}"
+            )
+            return
+
+        self.gripper_angle = angle
 
     def callback(self, data):
         """`mycobot/angles_real` subscriber callback method.
@@ -45,6 +60,12 @@ class Listener(object):
         joint_state_send.velocity = [0]
         joint_state_send.effort = []
         joint_state_send.header.stamp = rospy.Time.now()
+        
+        gripper_rad = (
+            self.gripper_angle * math.pi / 180
+            if self.gripper_angle is not None
+            else 0.0
+        )
 
         # process callback data
         radians_list = [
@@ -54,7 +75,7 @@ class Listener(object):
             data.joint_4 * (math.pi / 180),
             data.joint_5 * (math.pi / 180),
             data.joint_6 * (math.pi / 180),
-            self.gripper_angle * (math.pi / 180),
+            gripper_rad,
         ]
         # rospy.loginfo("res: {}".format(radians_list))
 

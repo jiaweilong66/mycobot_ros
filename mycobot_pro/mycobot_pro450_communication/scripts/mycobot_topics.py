@@ -223,9 +223,11 @@ class MycobotTopics:
             with self.lock:
                 try:
                     gripper_value = self.mc.get_pro_gripper_angle()
-                    if gripper_value:
+                    if gripper_value is not None:
                         ma.gripper_angle = gripper_value
                         pub.publish(ma)
+                    else:
+                        rospy.logwarn_throttle(2.0, "Gripper angle not available")
                 except Exception as e:
                     rospy.logerr(f"SerialException: {e}")
             time.sleep(0.05)
