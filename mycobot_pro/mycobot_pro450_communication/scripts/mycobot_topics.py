@@ -61,12 +61,12 @@ robot_msg = """
 MyCobot Status
 --------------------------------
 Joint Limit:
-    joint 1: -165 ~ +165
-    joint 2: -120 ~ +120
-    joint 3: -158 ~ +158
-    joint 4: -165 ~ +165
-    joint 5: -165 ~ +165
-    joint 6: -175 ~ +175
+    joint 1: -162 ~ +162
+    joint 2: -125 ~ +125
+    joint 3: -154 ~ +154
+    joint 4: -162 ~ +162
+    joint 5: -162 ~ +162
+    joint 6: -165 ~ +165
 """
 
 
@@ -223,9 +223,11 @@ class MycobotTopics:
             with self.lock:
                 try:
                     gripper_value = self.mc.get_pro_gripper_angle()
-                    if gripper_value:
+                    if gripper_value is not None:
                         ma.gripper_angle = gripper_value
                         pub.publish(ma)
+                    else:
+                        rospy.logwarn_throttle(2.0, "Gripper angle not available")
                 except Exception as e:
                     rospy.logerr(f"SerialException: {e}")
             time.sleep(0.05)

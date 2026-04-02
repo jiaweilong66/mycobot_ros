@@ -33,19 +33,19 @@ from mycobot_pro450_communication.srv import (
 
 # Joint angle limits
 JOINT_LIMITS = [
-    (-165, 165),  # joint 1
-    (-120, 120),  # joint 2
-    (-158, 158),  # joint 3
-    (-165, 165),  # joint 4
-    (-165, 165),  # joint 5
-    (-175, 175),  # joint 6
+    (-162, 162),  # joint 1
+    (-125, 125),  # joint 2
+    (-154, 154),  # joint 3
+    (-162, 162),  # joint 4
+    (-162, 162),  # joint 5
+    (-165, 165),  # joint 6
 ]
 
 # Coordinate limits
 COORD_LIMITS = [
-    (-466, 466),   # x
-    (-466, 466),   # y
-    (-230, 614),   # z
+    (-474, 474),   # x
+    (-466, 474),   # y
+    (-180, 677),   # z
     (-180, 180),   # rx
     (-180, 180),   # ry
     (-180, 180),   # rz

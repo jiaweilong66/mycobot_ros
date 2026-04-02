@@ -1,4 +1,4 @@
-__version__ = "1.0.1"
+__version__ = "1.0.3"
 
 def get_version():
     """Return current version of mycobot_pro_450 Python module."""

@@ -36,7 +36,7 @@ def talker():
         # get real angles from server
         res = func()
         gripper_res = gripper_service()
-        if res.joint_1 == res.joint_2 == res.joint_3 == 0.0:
+        if res is None:
             continue
         # print('gripper_res.gripper_angle:', gripper_res.gripper_angle)
         if gripper_res.gripper_angle != -1:
