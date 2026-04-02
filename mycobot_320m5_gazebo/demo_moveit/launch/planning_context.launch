@@ -6,7 +6,7 @@
   <arg name="robot_description" default="robot_description"/>
 
   <!-- Load universal robot description format (URDF) -->
-  <param if="$(arg load_robot_description)" name="$(arg robot_description)" command="xacro  '$(find mycobot_description)/urdf/robot_robotiq85_gripper.xacro'"/>
+  <param if="$(arg load_robot_description)" name="$(arg robot_description)" command="xacro  '$(find mycobot_320_description)/urdf/robot_robotiq85_gripper.xacro'"/>
 
   <!-- The semantic description that corresponds to the URDF -->
   <param name="$(arg robot_description)_semantic" textfile="$(find demo_moveit)/config/ur5.srdf" />
@@ -24,3 +24,4 @@
   </group>
 
 </launch>
+
